@@ -2,7 +2,7 @@
  * @Description: In User Settings Edit
  * @Author: your name
  * @Date: 2019-11-07 20:41:27
- * @LastEditTime: 2019-11-09 22:19:02
+ * @LastEditTime: 2019-11-09 22:32:26
  * @LastEditors: Please set LastEditors
  -->
 <template>
@@ -34,10 +34,13 @@ export default {
   methods: {
     async handleLogin () {
       const res = await this.$http.post('login', this.formdata)
+      console.log(res)
       const {
+        data,
         meta: { msg, status }
       } = res.data
       if (status === 200) {
+        localStorage.setItem('token', data.token)
         this.$router.push({ name: 'home' })
         this.$message.success(msg)
       } else {
