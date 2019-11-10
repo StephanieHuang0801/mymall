@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2019-11-09 21:15:55
- * @LastEditTime: 2019-11-10 16:29:35
+ * @LastEditTime: 2019-11-10 16:35:15
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \Vue.jsc:\编程\vuepro\mymall\src\components\home\home.vue
@@ -26,6 +26,7 @@
         <el-col :span="24">
           <el-menu
             default-active="2"
+            class="el-menu-vertical-demo"
             @open="handleOpen"
             @close="handleClose"
             background-color="teal"
@@ -155,6 +156,5 @@ export default {
     position: relative;
     margin: 0;
     padding-left: 0;
-    background-color: #FFF;
 }
 </style>
