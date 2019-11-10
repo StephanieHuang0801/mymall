@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2019-11-09 21:15:55
- * @LastEditTime: 2019-11-10 15:19:18
+ * @LastEditTime: 2019-11-10 15:45:20
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \Vue.jsc:\编程\vuepro\mymall\src\components\home\home.vue
@@ -30,7 +30,7 @@
             background-color="teal"
             text-color="#fff"
             active-text-color="#ffff33"
-            unique-opened="false"
+            :unique-opened= true
           >
             <el-submenu index="1">
               <template slot="title">
@@ -103,15 +103,21 @@
 </template>
 <script>
 export default {
+  beforeCreate () {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      this.$router.push({name: 'login'})
+    }
+  },
   methods: {
-    handleOpen(key, keyPath) {
-      console.log(key, keyPath);
+    handleOpen (key, keyPath) {
+      console.log(key, keyPath)
     },
-    handleClose(key, keyPath) {
-      console.log(key, keyPath);
+    handleClose (key, keyPath) {
+      console.log(key, keyPath)
     }
   }
-};
+}
 </script>
 <style>
 .container {
