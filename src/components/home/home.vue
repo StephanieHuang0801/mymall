@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2019-11-09 21:15:55
- * @LastEditTime: 2019-11-10 15:57:21
+ * @LastEditTime: 2019-11-10 16:29:35
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \Vue.jsc:\编程\vuepro\mymall\src\components\home\home.vue
@@ -25,19 +25,21 @@
       <el-aside class="aside" width="200px">
         <el-col :span="24">
           <el-menu
+            default-active="2"
             @open="handleOpen"
             @close="handleClose"
             background-color="teal"
             text-color="#fff"
             active-text-color="#ffff33"
             :unique-opened= true
+            :router= true
           >
             <el-submenu index="1">
               <template slot="title">
                 <i class="el-icon-s-custom"></i>
                 <span>用户管理</span>
               </template>
-              <el-menu-item index="1-1">
+              <el-menu-item index="users">
                 <i class="el-icon-menu"></i>
                 <span>用户列表</span>
               </el-menu-item>
@@ -97,7 +99,9 @@
           </el-menu>
         </el-col>
       </el-aside>
-      <el-main class="main">Main</el-main>
+      <el-main class="main">
+          <router-view></router-view>
+      </el-main>
     </el-container>
   </el-container>
 </template>
@@ -144,5 +148,13 @@ export default {
 .logout {
   line-height: 60px;
   text-decoration: none;
+}
+.el-menu {
+    border-right: none;
+    list-style: none;
+    position: relative;
+    margin: 0;
+    padding-left: 0;
+    background-color: #FFF;
 }
 </style>
