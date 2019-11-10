@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2019-11-09 21:15:55
- * @LastEditTime: 2019-11-10 15:45:20
+ * @LastEditTime: 2019-11-10 15:57:21
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \Vue.jsc:\编程\vuepro\mymall\src\components\home\home.vue
@@ -17,7 +17,7 @@
           <h2 class="logo">后台管理系统</h2>
         </el-col>
         <el-col :span="2">
-          <a href="#" class="logout">退出</a>
+          <el-button type="info" @click="signout">退出</el-button>
         </el-col>
       </el-row>
     </el-header>
@@ -115,6 +115,11 @@ export default {
     },
     handleClose (key, keyPath) {
       console.log(key, keyPath)
+    },
+    signout () {
+      localStorage.clear()
+      this.$message.success('退出系统')
+      this.$router.push({name: 'login'})
     }
   }
 }
