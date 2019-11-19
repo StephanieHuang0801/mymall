@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2019-11-15 21:53:30
- * @LastEditTime: 2019-11-19 20:13:58
+ * @LastEditTime: 2019-11-19 21:41:33
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \Vue.jsc:\编程\vuepro\mymall\src\components\rights\right.vue
@@ -55,8 +55,8 @@ export default {
   },
   data () {
     return {
-      rightList: [],
-      level: -1
+      rightList: []
+      // level: -1
     }
   },
   methods: {
@@ -68,7 +68,7 @@ export default {
       // const res = await this.$http.get(`users/500`)
       console.log(res)
       this.rightList = res.data.data
-      this.rightList.level = res.data.data.level
+      // this.rightList.level = res.data.data.level
     }
   }
 //   filters: {
