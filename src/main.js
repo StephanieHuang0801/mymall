@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2019-11-06 22:41:40
- * @LastEditTime: 2019-11-10 21:32:48
+ * @LastEditTime: 2019-11-15 22:34:08
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \Vue.jsc:\编程\vuepro\mymall\src\main.js
@@ -16,6 +16,7 @@ import router from './router'
 import '@/assets/css/reset.css'
 import http from '@/plugins/http.js'
 import moment from 'moment'
+import myBread from '@/components/cuscom/myBread.vue'
 
 Vue.config.productionTip = false
 // 使用vue插件
@@ -25,6 +26,7 @@ Vue.use(http)
 Vue.filter('fmtdate', (v) => {
   return moment(v).format('YYYY-MM-DD')
 })
+Vue.component(myBread.name, myBread)
 new Vue({
   el: '#app',
   router,
