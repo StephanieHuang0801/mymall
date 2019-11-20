@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2019-11-18 22:08:34
- * @LastEditTime: 2019-11-19 22:52:03
+ * @LastEditTime: 2019-11-20 22:00:07
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \Vue.jsc:\编程\vuepro\mymall\src\components\rights\role.vue
@@ -14,21 +14,22 @@
 <el-table-column type="expand" prop="roleList">
     <template slot-scope = "scope">
     <!-- 一级 一行两列 -->
+    <span v-if="scope.row.children.length===0">该角色无权限</span>
     <el-row v-for="(item1,i) in scope.row.children" :key="i">
         <!-- 第一列中放一级标签 -->
         <el-col :span="4">
-            <!-- 可移除标签，这里展示一级标签 -->
-            <el-tag closable>{{item1.authName}}</el-tag>
+            <!-- 可移除标签，这里展示一级标签,绑定取消权限方法 -->
+            <el-tag closable @close="delRight(item1.id,scope.row)">{{item1.authName}}</el-tag>
         </el-col>
         <el-col :span="20">
             <!-- 第二列也是一行两列 -->
             <el-row v-for="(item2,index) in item1.children" :key="index">
                 <!-- 第二行第一列中放二级标签 -->
                 <el-col :span="4">
-                    <el-tag type="success" closable>{{item2.authName}}</el-tag>
+                    <el-tag type="success" closable @close="delRight(item2.id,scope.row)">{{item2.authName}}</el-tag>
                 </el-col>
                 <el-col :span="20">
-                    <el-tag closable type="warning" v-for="(item3,indexInner) in item2.children" :key="indexInner">{{item3.authName}}</el-tag>
+                    <el-tag @close="delRight(item3.id,scope.row)" closable type="warning" v-for="(item3,indexInner) in item2.children" :key="indexInner">{{item3.authName}}</el-tag>
                 </el-col>
             </el-row>
         </el-col>
@@ -43,16 +44,33 @@
         </el-table-column>
         <el-table-column prop="roleList" label="操作">
             <!-- 编辑用户按钮 -->
-            <template slot-scope="roleList">
-                <!-- 编辑按钮 -->
+            <template slot-scope="scope">
+                <!-- 编辑角色按钮 -->
                 <el-button type="primary" icon="el-icon-edit" size="small" circle @click="editRole(roleList.row)"></el-button>
-                <!-- 设置用户角色按钮 -->
-                <el-button type="success" icon="el-icon-setting" size="small" circle @click="showRoleBox(roleList.row)"></el-button>
-                <!-- 删除按钮 -->
+                <!-- 设置角色权限按钮 -->
+                <el-button type="success" icon="el-icon-setting" size="small" circle @click="editRightBox()"></el-button>
+                <!-- 删除角色按钮 -->
                 <el-button type="danger" icon="el-icon-delete" size="small" circle @click="delRole(roleList.row.id)"></el-button>
             </template>
         </el-table-column>
     </el-table>
+    <!-- 分配权限弹框 -->
+    <el-dialog title="分配权限" :visible.sync="dialogFormVisibleRight">
+        <!-- {{树形结构}} -->
+        <!-- node-key的值，是treelist这个数据来源中的该值的key名 -->
+        <el-tree
+        :data="treelist"
+        show-checkbox
+        node-key="id"
+        :default-expanded-keys="[2, 3]"
+        :default-checked-keys="[5]"
+        :props="defaultProps">
+        </el-tree>
+       <div slot="footer" class="dialog-footer">
+          <el-button @click="dialogFormVisibleRight = false">取 消</el-button>
+          <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+       </div>
+    </el-dialog>
 </el-card>
 </template>2
 <script>
@@ -64,24 +82,70 @@ export default {
   },
   data () {
     return {
-      roleList: []
-    //   rightList: []
+      roleList: [],
+      dialogFormVisibleRight: false,
+      //   树形结构绑定的data,data是数组一级的Array(5)，对于每个一级，又是一个对象
+      treelist: [],
+      defaultProps: {
+        children: 'children',
+        label: 'authName'
+        // 这两个值要去treelist的属性中找,这是实现绑定的关键
+      }
     }
+    // 这是文档的结构，我用treelist代替
+    // data: [{
+    //     id: 1,
+    //     label: '一级 1',
+    //     children: [{
+    //       id: 4,
+    //       label: '二级 1-1',
+    //       children: [{
+    //         id: 9,
+    //         label: '三级 1-1-1'
+    //       }, {
+    //         id: 10,
+    //         label: '三级 1-1-2'
+    //       }]
+    //     }]
+    //   }],
+    //   defaultProps: {
+    //     children: 'children',
+    //     label: 'label'
+    //   }
+    // }
+    //   rightList: []
   },
   methods: {
     async getRoleList () {
       const res = await this.$http.get(`roles`)
-      console.log(res)
+      //   console.log(res)
       this.roleList = res.data.data
+    //   console.log(typeof(res.data.data[2].children))
     },
-    // async getRightsList () {
-    //   const res1 = await this.$http.get(`rights/tree`)
-    //   console.log(res1)
-    //   this.rightList = res1.data.data
-    // },
-    editRole () {},
-    delRole () {},
-    showRoleBox () {}
+    async getRightsList () {
+      const res1 = await this.$http.get(`rights/tree`)
+      console.log(res1)
+      this.treelist = res1.data.data
+    },
+    // async delRight (rightId, roleId) {
+    async delRight (rightId, role) {
+    // roles/:roleId/rights/:rightId delete方法
+    // roleList里有roleid
+      const res = await this.$http.delete(`roles/${role.id}/rights/${rightId}`)
+      if (res.data.meta.status === 200) {
+        this.$message.success(res.data.meta.msg)
+      } else {
+        this.$message.warning(res.data.meta.msg)
+      }
+      // console.log(res)
+      role.children = res.data.data
+    },
+    // 分配用户权限
+    editRightBox () {
+      this.dialogFormVisibleRight = true
+      //   this.treelist = role.children 这里不是要只展示现有的功能
+      this.getRightsList()
+    }
   }
 }
 </script>
