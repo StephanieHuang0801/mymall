@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2019-11-18 22:08:34
- * @LastEditTime: 2019-11-20 22:00:07
+ * @LastEditTime: 2019-11-20 22:32:53
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \Vue.jsc:\编程\vuepro\mymall\src\components\rights\role.vue
@@ -58,11 +58,12 @@
     <el-dialog title="分配权限" :visible.sync="dialogFormVisibleRight">
         <!-- {{树形结构}} -->
         <!-- node-key的值，是treelist这个数据来源中的该值的key名 -->
+        <!-- :default-expanded-keys="allRoleId" 不需要forEach获得所有id了，这一个属性就完成所有功能-->
         <el-tree
+        default-expand-all
         :data="treelist"
         show-checkbox
         node-key="id"
-        :default-expanded-keys="[2, 3]"
         :default-checked-keys="[5]"
         :props="defaultProps">
         </el-tree>
@@ -91,6 +92,7 @@ export default {
         label: 'authName'
         // 这两个值要去treelist的属性中找,这是实现绑定的关键
       }
+    //   allRoleId: []
     }
     // 这是文档的结构，我用treelist代替
     // data: [{
@@ -126,6 +128,21 @@ export default {
       const res1 = await this.$http.get(`rights/tree`)
       console.log(res1)
       this.treelist = res1.data.data
+      // console.log('treelist:', this.treelist)
+      // var tmpArr = []
+      // this.treelist.forEach(item1 => {
+      //   tmpArr.push(item1.id)
+      //   var item2 = item1.children
+      //   item2.forEach(item2 => {
+      //     tmpArr.push(item2.id)
+      //     var item3 = item2.children
+      //     item3.forEach(item3 => {
+      //       tmpArr.push(item3.id)
+      //     })
+      //   })
+      //   // console.log('tmpArr', tmpArr)
+      // })
+      // this.allRoleId = tmpArr
     },
     // async delRight (rightId, roleId) {
     async delRight (rightId, role) {
@@ -145,6 +162,11 @@ export default {
       this.dialogFormVisibleRight = true
       //   this.treelist = role.children 这里不是要只展示现有的功能
       this.getRightsList()
+      // 将所有权限的id赋值给数组allRoleId
+      // console.log('treelist:', this.treelist)
+      // 问题：发现这里拿不到treelist
+      //   this.allRoleId = tmpArr
+      //   console.log(tmpArr)
     }
   }
 }
