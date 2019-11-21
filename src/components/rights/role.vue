@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2019-11-18 22:08:34
- * @LastEditTime: 2019-11-21 21:40:27
+ * @LastEditTime: 2019-11-21 22:38:01
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \Vue.jsc:\编程\vuepro\mymall\src\components\rights\role.vue
@@ -61,6 +61,7 @@
         <!-- :default-expanded-keys="allRoleId" 不需要forEach获得所有id了，这一个属性就完成所有功能-->
         <!-- check-strictly在显示复选框的情况下，是否严格的遵循父子不互相关联的做法，默认为 false -->
         <el-tree
+        ref="mytree"
         default-expand-all
         :data="treelist"
         show-checkbox
@@ -70,7 +71,7 @@
         </el-tree>
        <div slot="footer" class="dialog-footer">
           <el-button @click="dialogFormVisibleRight = false">取 消</el-button>
-          <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+          <el-button type="primary" @click="confirmRole()">确 定</el-button>
        </div>
     </el-dialog>
 </el-card>
@@ -90,6 +91,7 @@ export default {
       treelist: [],
       checklist: [],
       checklistArr: [],
+      currentRoleId: -1,
       defaultProps: {
         children: 'children',
         label: 'authName'
@@ -123,7 +125,7 @@ export default {
   methods: {
     async getRoleList () {
       const res = await this.$http.get(`roles`)
-      //   console.log(res)
+      console.log(res)
       this.roleList = res.data.data
     //   console.log(typeof(res.data.data[2].children))
     },
@@ -164,6 +166,7 @@ export default {
     editRightBox (role) {
       this.dialogFormVisibleRight = true
       this.checklist = role.children
+      this.currentRoleId = role.id
       //  这里只展示现有的功能
       this.getRightsList()
       // 将所有权限的id赋值给数组allRoleId
@@ -183,9 +186,22 @@ export default {
         })
       })
       this.checklistArr = tmpArr
-      console.log('tmpArr', tmpArr)
-      var length = tmpArr.length
-      console.log('length', length)
+      //   console.log('tmpArr', tmpArr)
+      //   var length = tmpArr.length
+      //   console.log('length', length)
+    },
+    // 点击确认按钮，增删改权限
+    async confirmRole () {
+      this.dialogFormVisibleRight = false
+      // getCheckedKeys若节点可被选择（即 show-checkbox 为 true），则返回目前被选中的节点的 key 所组成的数组
+      // getHalfCheckedKeys若节点可被选择（即 show-checkbox 为 true），则返回目前半选中的节点的 key 所组成的数组
+      // 角色授权接口post roles/:roleId/rights请求体rids
+      let arr1 = this.$refs.mytree.getCheckedKeys()
+      let arr2 = this.$refs.mytree.getHalfCheckedKeys()
+      let arr = [...arr1, ...arr2]
+      const res = await this.$http.post(`roles/${this.currentRoleId}/rights`, {rids: arr.join(',')})
+      console.log('设置角色', res)
+      this.getRoleList()
     }
   }
 }
