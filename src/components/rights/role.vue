@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2019-11-18 22:08:34
- * @LastEditTime: 2019-11-20 22:32:53
+ * @LastEditTime: 2019-11-21 21:40:27
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \Vue.jsc:\编程\vuepro\mymall\src\components\rights\role.vue
@@ -48,7 +48,7 @@
                 <!-- 编辑角色按钮 -->
                 <el-button type="primary" icon="el-icon-edit" size="small" circle @click="editRole(roleList.row)"></el-button>
                 <!-- 设置角色权限按钮 -->
-                <el-button type="success" icon="el-icon-setting" size="small" circle @click="editRightBox()"></el-button>
+                <el-button type="success" icon="el-icon-setting" size="small" circle @click="editRightBox(scope.row)"></el-button>
                 <!-- 删除角色按钮 -->
                 <el-button type="danger" icon="el-icon-delete" size="small" circle @click="delRole(roleList.row.id)"></el-button>
             </template>
@@ -59,12 +59,13 @@
         <!-- {{树形结构}} -->
         <!-- node-key的值，是treelist这个数据来源中的该值的key名 -->
         <!-- :default-expanded-keys="allRoleId" 不需要forEach获得所有id了，这一个属性就完成所有功能-->
+        <!-- check-strictly在显示复选框的情况下，是否严格的遵循父子不互相关联的做法，默认为 false -->
         <el-tree
         default-expand-all
         :data="treelist"
         show-checkbox
         node-key="id"
-        :default-checked-keys="[5]"
+        :default-checked-keys="checklistArr"
         :props="defaultProps">
         </el-tree>
        <div slot="footer" class="dialog-footer">
@@ -87,6 +88,8 @@ export default {
       dialogFormVisibleRight: false,
       //   树形结构绑定的data,data是数组一级的Array(5)，对于每个一级，又是一个对象
       treelist: [],
+      checklist: [],
+      checklistArr: [],
       defaultProps: {
         children: 'children',
         label: 'authName'
@@ -158,15 +161,31 @@ export default {
       role.children = res.data.data
     },
     // 分配用户权限
-    editRightBox () {
+    editRightBox (role) {
       this.dialogFormVisibleRight = true
-      //   this.treelist = role.children 这里不是要只展示现有的功能
+      this.checklist = role.children
+      //  这里只展示现有的功能
       this.getRightsList()
       // 将所有权限的id赋值给数组allRoleId
-      // console.log('treelist:', this.treelist)
+      console.log('role', role)
+      console.log('checklist:', this.checklist)
       // 问题：发现这里拿不到treelist
-      //   this.allRoleId = tmpArr
-      //   console.log(tmpArr)
+      var tmpArr = []
+      this.checklist.forEach(item1 => {
+        // tmpArr.push(item1.id)
+        var item2 = item1.children
+        item2.forEach(item2 => {
+        //   tmpArr.push(item2.id)
+          var item3 = item2.children
+          item3.forEach(item3 => {
+            tmpArr.push(item3.id)
+          })
+        })
+      })
+      this.checklistArr = tmpArr
+      console.log('tmpArr', tmpArr)
+      var length = tmpArr.length
+      console.log('length', length)
     }
   }
 }
