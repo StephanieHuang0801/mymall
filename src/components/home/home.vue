@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2019-11-09 21:15:55
- * @LastEditTime: 2019-11-18 22:09:07
+ * @LastEditTime: 2019-11-22 20:56:24
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \Vue.jsc:\编程\vuepro\mymall\src\components\home\home.vue
@@ -22,6 +22,7 @@
       </el-row>
     </el-header>
     <el-container>
+      <!-- 将侧边菜单栏改为动态的 -->
       <el-aside class="aside" width="200px">
         <el-col :span="24">
           <el-menu
@@ -35,7 +36,8 @@
             :unique-opened= true
             :router= true
           >
-            <el-submenu index="1">
+          <!-- 用户管理 -->
+            <!-- <el-submenu index="1">
               <template slot="title">
                 <i class="el-icon-s-custom"></i>
                 <span>用户管理</span>
@@ -44,8 +46,18 @@
                 <i class="el-icon-menu"></i>
                 <span>用户列表</span>
               </el-menu-item>
+            </el-submenu> -->
+           <el-submenu :index="item1.order.toString()" v-for="item1 in menus" :key="item1.id">
+              <template slot="title">
+                <i class="el-icon-s-custom"></i>
+                <span>{{item1.authName}}</span>
+              </template>
+              <el-menu-item :index="item2.path" v-for="item2 in item1.children" :key="item2.id">
+                <i class="el-icon-menu"></i>
+                <span>{{item2.authName}}</span>
+              </el-menu-item>
             </el-submenu>
-            <el-submenu index="2">
+            <!-- <el-submenu index="2">
               <template slot="title">
                 <i class="el-icon-s-cooperation"></i>
                 <span>权限管理</span>
@@ -96,7 +108,7 @@
                 <i class="el-icon-menu"></i>
                 <span>数据报表</span>
               </el-menu-item>
-            </el-submenu>
+            </el-submenu> -->
           </el-menu>
         </el-col>
       </el-aside>
@@ -108,11 +120,19 @@
 </template>
 <script>
 export default {
+  data () {
+    return {
+      menus: []
+    }
+  },
   beforeCreate () {
     const token = localStorage.getItem('token')
     if (!token) {
       this.$router.push({name: 'login'})
     }
+  },
+  created () {
+    this.getMenus()
   },
   methods: {
     handleOpen (key, keyPath) {
@@ -125,6 +145,12 @@ export default {
       localStorage.clear()
       this.$message.success('退出系统')
       this.$router.push({name: 'login'})
+    },
+    async getMenus () {
+      // 左侧菜单权限 menus
+      const res = await this.$http.get(`menus`)
+      // console.log('menus', this.menus)
+      this.menus = res.data.data
     }
   }
 }
