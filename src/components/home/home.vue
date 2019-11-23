@@ -126,10 +126,10 @@ export default {
     }
   },
   beforeCreate () {
-    const token = localStorage.getItem('token')
-    if (!token) {
-      this.$router.push({name: 'login'})
-    }
+    // const token = localStorage.getItem('token')
+    // if (!token) {
+    //   this.$router.push({name: 'login'})
+    // }
   },
   created () {
     this.getMenus()

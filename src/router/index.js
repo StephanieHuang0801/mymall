@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2019-11-06 22:41:40
- * @LastEditTime: 2019-11-22 20:48:40
+ * @LastEditTime: 2019-11-23 11:45:21
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \Vue.jsc:\编程\vuepro\mymall\src\router\index.js
@@ -13,9 +13,10 @@ import Home from '@/components/home/home.vue'
 import Users from '@/components/users/users.vue'
 import Right from '@/components/rights/right.vue'
 import Role from '@/components/rights/role.vue'
+import { Message } from 'element-ui'
 Vue.use(Router)
 
-export default new Router({
+const router = new Router({
   routes: [
     { name: 'login',
       path: '/login',
@@ -40,3 +41,18 @@ export default new Router({
     }
   ]
 })
+router.beforeEach((to, from, next) => {
+  // ...
+  if (to.path === '/login') {
+    next()
+  } else {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      router.push({name: 'login'})
+      Message.warning('请登录')
+      return
+    }
+    next()
+  }
+})
+export default router
