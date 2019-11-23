@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2019-11-06 22:41:40
- * @LastEditTime: 2019-11-23 11:45:21
+ * @LastEditTime: 2019-11-23 16:53:09
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \Vue.jsc:\编程\vuepro\mymall\src\router\index.js
@@ -13,6 +13,8 @@ import Home from '@/components/home/home.vue'
 import Users from '@/components/users/users.vue'
 import Right from '@/components/rights/right.vue'
 import Role from '@/components/rights/role.vue'
+import GoodsList from '@/components/goods/goodslist.vue'
+import GoodsAdd from '@/components/goods/goodsadd.vue'
 import { Message } from 'element-ui'
 Vue.use(Router)
 
@@ -36,6 +38,14 @@ const router = new Router({
         { name: 'role',
           path: 'roles',
           component: Role
+        },
+        { name: 'goodslists',
+          path: 'goods',
+          component: GoodsList
+        },
+        { name: 'goodsadd',
+          path: 'goodsadd',
+          component: GoodsAdd
         }
       ]
     }

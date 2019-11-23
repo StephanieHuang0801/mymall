@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2019-11-09 21:15:55
- * @LastEditTime: 2019-11-22 20:56:24
+ * @LastEditTime: 2019-11-23 16:45:16
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \Vue.jsc:\编程\vuepro\mymall\src\components\home\home.vue
@@ -149,8 +149,8 @@ export default {
     async getMenus () {
       // 左侧菜单权限 menus
       const res = await this.$http.get(`menus`)
-      // console.log('menus', this.menus)
       this.menus = res.data.data
+      // console.log('menus', this.menus)
     }
   }
 }
