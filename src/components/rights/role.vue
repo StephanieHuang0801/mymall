@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2019-11-18 22:08:34
- * @LastEditTime: 2019-11-21 22:38:01
+ * @LastEditTime: 2019-11-23 12:42:08
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \Vue.jsc:\编程\vuepro\mymall\src\components\rights\role.vue
@@ -9,6 +9,8 @@
 <template>
 <el-card>
     <my-bread level1="权限管理" level2="角色列表"></my-bread>
+    <!-- 添加按钮 -->
+    <el-button type="success" @click="dialogFormVisibleRole = true" class="addBtn">添加角色</el-button>
     <el-table :data="roleList" height="450" border style="width: 100%;margin-top: 15px">
         <!-- 给表格添加展开功能，添加一个带有展开属性的标签 请求所有权限列表，树形类型,错-->
 <el-table-column type="expand" prop="roleList">
@@ -45,12 +47,12 @@
         <el-table-column prop="roleList" label="操作">
             <!-- 编辑用户按钮 -->
             <template slot-scope="scope">
-                <!-- 编辑角色按钮 -->
-                <el-button type="primary" icon="el-icon-edit" size="small" circle @click="editRole(roleList.row)"></el-button>
+                <!-- 编辑角色基本信息按钮 -->
+                <el-button type="primary" icon="el-icon-edit" size="small" circle @click="dialogFormVisibleEditRole = true"></el-button>
                 <!-- 设置角色权限按钮 -->
-                <el-button type="success" icon="el-icon-setting" size="small" circle @click="editRightBox(scope.row)"></el-button>
+                <el-button type="success" icon="el-icon-setting" size="small" circle @click="editRight(scope.row)"></el-button>
                 <!-- 删除角色按钮 -->
-                <el-button type="danger" icon="el-icon-delete" size="small" circle @click="delRole(roleList.row.id)"></el-button>
+                <el-button type="danger" icon="el-icon-delete" size="small" circle @click="delRole(scope.row.id)"></el-button>
             </template>
         </el-table-column>
     </el-table>
@@ -74,6 +76,37 @@
           <el-button type="primary" @click="confirmRole()">确 定</el-button>
        </div>
     </el-dialog>
+    <!-- 添加角色弹框 -->
+    <el-dialog title="添加角色" :visible.sync="dialogFormVisibleRole">
+        <el-form :model="form">
+            <el-form-item label="角色名称" >
+                <el-input v-model="form.roleName" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="角色描述" >
+                <el-input v-model="form.roleDesc" autocomplete="off"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormVisibleRole = false">取 消</el-button>
+            <el-button type="primary" @click="addRole">确 定</el-button>
+        </div>
+    </el-dialog>
+    <!-- 编辑角色弹框 -->
+    <el-dialog title="编辑角色信息" :visible.sync="dialogFormVisibleEditRole">
+        <el-form :model="form">
+            <el-form-item label="角色名称" >
+                <el-input v-model="form.roleName" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="角色描述" >
+                <el-input v-model="form.roleDesc" autocomplete="off"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormVisibleRole = false">取 消</el-button>
+            <el-button type="primary" @click="editRole">确 定</el-button>
+        </div>
+    </el-dialog>
+
 </el-card>
 </template>2
 <script>
@@ -87,6 +120,10 @@ export default {
     return {
       roleList: [],
       dialogFormVisibleRight: false,
+      dialogFormVisibleRole: false,
+      dialogFormVisibleEditRole: false,
+      form: {},
+      // 添加角色
       //   树形结构绑定的data,data是数组一级的Array(5)，对于每个一级，又是一个对象
       treelist: [],
       checklist: [],
@@ -125,13 +162,13 @@ export default {
   methods: {
     async getRoleList () {
       const res = await this.$http.get(`roles`)
-      console.log(res)
+      // console.log(res)
       this.roleList = res.data.data
     //   console.log(typeof(res.data.data[2].children))
     },
     async getRightsList () {
       const res1 = await this.$http.get(`rights/tree`)
-      console.log(res1)
+      // console.log(res1)
       this.treelist = res1.data.data
       // console.log('treelist:', this.treelist)
       // var tmpArr = []
@@ -163,15 +200,15 @@ export default {
       role.children = res.data.data
     },
     // 分配用户权限
-    editRightBox (role) {
+    editRight (role) {
       this.dialogFormVisibleRight = true
       this.checklist = role.children
       this.currentRoleId = role.id
       //  这里只展示现有的功能
       this.getRightsList()
       // 将所有权限的id赋值给数组allRoleId
-      console.log('role', role)
-      console.log('checklist:', this.checklist)
+      // console.log('role', role)
+      // console.log('checklist:', this.checklist)
       // 问题：发现这里拿不到treelist
       var tmpArr = []
       this.checklist.forEach(item1 => {
@@ -202,9 +239,48 @@ export default {
       const res = await this.$http.post(`roles/${this.currentRoleId}/rights`, {rids: arr.join(',')})
       console.log('设置角色', res)
       this.getRoleList()
+    },
+    // 添加角色
+    // roles post roleName角色名称不能为空 roleDesc可以为空
+    async addRole () {
+      const res = await this.$http.post(`roles`, this.form)
+      // console.log('角色', res)
+      if (res.data.meta.status === 201) {
+        this.$message.success(res.data.meta.msg)
+      } else {
+        this.$message.warning(res.data.meta.msg)
+      }
+      this.dialogFormVisibleRole = false
+      this.getRoleList()
+    },
+    // 编辑角色基本信息 put roles/:id roleName角色名称不能为空 roleDesc可以为空
+    async editRole () {
+      const res = await this.$http.put(`roles/${this.currentRoleId}`, this.form)
+      // console.log('编辑角色', res)
+      if (res.data.meta.status === 200) {
+        this.$message.success(res.data.meta.msg)
+      } else {
+        this.$message.warning(res.data.meta.msg)
+      }
+      this.getRoleList()
+      this.dialogFormVisibleEditRole = false
+    },
+    // 删除角色 roles/:id delete
+    async delRole (id) {
+      const res = await this.$http.delete(`roles/${id}`)
+      // console.log(res)
+      if (res.data.meta.status === 200) {
+        this.$message.success(res.data.meta.msg)
+      } else {
+        this.$message.warning(res.data.meta.msg)
+      }
+      this.getRoleList()
     }
   }
 }
 </script>
 <style>
+.addBtn {
+  margin-top: 15px;
+}
 </style>
