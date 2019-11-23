@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2019-11-23 16:41:12
- * @LastEditTime: 2019-11-23 17:55:13
+ * @LastEditTime: 2019-11-23 20:09:14
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \Vue.jsc:\编程\vuepro\mymall\src\components\goods\goodsadd.vue
@@ -54,7 +54,13 @@
           <el-input v-model="form.goods_number"></el-input>
         </el-form-item>
         <el-form-item label="商品分类">
-          <el-input v-model="form.goods_cat"></el-input>
+          <!-- 这里需要一个级联选择器，版本更新，这是2.12.0版的 -->
+          <!-- <el-input v-model="form.goods_cat"></el-input> -->
+           <el-cascader
+           v-model="form.value"
+           :options="form.options"
+           :props="{ expandTrigger: 'hover' }"
+           ></el-cascader>
         </el-form-item>
       </el-tab-pane>
       <el-tab-pane label="商品参数" name="2">商品参数</el-tab-pane>
@@ -70,7 +76,7 @@ export default {
   data () {
     return {
       active: '1',
-      //   商品表单数据
+      // 商品表单数据
       form: {
         goods_name: '',
         goods_cat: '',
@@ -79,7 +85,23 @@ export default {
         goods_weight: '',
         goods_introduce: '',
         pics: '',
-        attrs: ''
+        attrs: '',
+        // 级联选择器使用的数据
+        value: [],
+        options: [{
+          value: 'ziyuan',
+          label: '资源',
+          children: [{
+            value: 'axure',
+            label: 'Axure Components'
+          }, {
+            value: 'sketch',
+            label: 'Sketch Templates'
+          }, {
+            value: 'jiaohu',
+            label: '组件交互文档'
+          }]
+        }]
       }
     }
   },
@@ -89,6 +111,46 @@ export default {
     //   console.log(tab, event)
     //   this.active = parseInt(this.activeName)
     // }
+    // 获取所有商品分类 categories type [1,2,3] 值：1，2，3 分别表示显示一层二层三层分类列表
+    async getCategories () {
+      const res = await this.$http.get(`categories`)
+      const catAll = res.data.data
+      var myoptions = []
+      catAll.forEach(item1 => {
+        var tmpArr = []
+        var tmpObj = {}
+        tmpObj.value = item1.cat_id
+        tmpObj.label = item1.cat_name
+        if (item1.children) {
+          item1.children.forEach(item2 => {
+            var tmpObj2 = {}
+            var tmpArr2 = []
+            tmpObj2.value = item2.cat_id
+            tmpObj2.label = item2.cat_name
+            if (item2.children) {
+              item2.children.forEach(item3 => {
+                var tmpObj3 = {}
+                tmpObj3.value = item3.cat_id
+                tmpObj3.label = item3.cat_name
+                tmpArr2.push(tmpObj3)
+              })
+            }
+            tmpObj2.children = tmpArr2
+            tmpArr.push(tmpObj2)
+          })
+        }
+        tmpObj.children = tmpArr
+        // console.log('每一回遍历得到的', tmpObj)
+        myoptions.push(tmpObj)
+      })
+      this.form.options = myoptions
+    //   console.log('商品分类', res)
+    //   console.log('options', this.form.options)
+    }
+  },
+  created () {
+    this.getCategories()
+    // console.log('生效了吗')
   }
 }
 </script>
