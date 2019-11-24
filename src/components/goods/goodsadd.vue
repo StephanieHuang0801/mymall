@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2019-11-23 16:41:12
- * @LastEditTime: 2019-11-24 16:34:27
+ * @LastEditTime: 2019-11-24 21:14:00
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \Vue.jsc:\编程\vuepro\mymall\src\components\goods\goodsadd.vue
@@ -95,14 +95,43 @@
           <el-input v-model="item.attr_vals"></el-input>
         </el-form-item>
       </el-tab-pane>
-      <el-tab-pane label="商品图片" name="4">商品图片</el-tab-pane>
-      <el-tab-pane label="商品内容" name="5">商品内容</el-tab-pane>
+      <!-- 上传图片 upload组件 -->
+      <el-tab-pane label="商品图片" name="4">
+        <el-form-item label-width="auto">
+          <el-upload
+            action="http://localhost:8888/api/private/v1/upload"
+            :headers="header"
+            :on-preview="handlePreview"
+            :on-remove="handleRemove"
+            :on-success="handleSuccess"
+            :file-list="fileList"
+            list-type="picture">
+            <el-button size="small" type="primary">点击上传</el-button>
+            <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+          </el-upload>
+        </el-form-item>
+      </el-tab-pane>
+      <el-tab-pane label="商品内容" name="5">
+        <el-form-item label-width="auto">
+          <el-button type="primary" size="small" >添加商品</el-button>
+          <!-- 富文本编辑器 vue-quill-editor -->
+          <quill-editor></quill-editor>
+        </el-form-item>
+      </el-tab-pane>
     </el-tabs>
   </el-form>
 </el-card>
 </template>
 <script>
+// require styles
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css'
+import { quillEditor } from 'vue-quill-editor'
 export default {
+  components: {
+    quillEditor
+  },
   data () {
     return {
       active: '1',
@@ -131,10 +160,23 @@ export default {
       // }
       // 动态参数、静态参数
       dynamicAttrs: [],
-      staticAttrs: []
+      staticAttrs: [],
+      // 上传图片前要设置头部（除了登录请求其他所有请求都要设置）
+      header: {
+        Authorization: localStorage.getItem('token')
+      },
+      fileList: []
     }
   },
   methods: {
+    // 上传图片相关方法
+    handlePreview (file) {},
+    handleRemove (file) {
+      console.log('删除图片的file', file)
+    },
+    handleSuccess (file) {
+      console.log('上传图片的file', file)
+    },
     // 点击纵向标签页,点的是第二个tab同时三级分类要有值
     async handleClick () {
       if (this.active !== '1') {
@@ -212,4 +254,8 @@ export default {
 }
 </script>
 <style>
+.quill-editor {
+  margin-top: 10px;
+  height: 350px;
+}
 </style>
