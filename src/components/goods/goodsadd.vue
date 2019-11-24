@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2019-11-23 16:41:12
- * @LastEditTime: 2019-11-23 20:52:05
+ * @LastEditTime: 2019-11-24 15:24:35
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \Vue.jsc:\编程\vuepro\mymall\src\components\goods\goodsadd.vue
@@ -39,7 +39,7 @@
   attrs商品的参数（数组）可以为空 -->
   <el-form ref="form" :model="form" label-width="80px">
     <el-tabs tab-position="left" style="height: 400px;margin-top: 20px;"
-    v-model="active">
+    v-model="active" @tab-click="handleClick">
       <el-tab-pane label="基本信息" name="1">
         <el-form-item label="商品名称">
           <el-input v-model="form.goods_name"></el-input>
@@ -62,8 +62,9 @@
            :props="{ expandTrigger: 'hover' }"
           > -->
            <el-cascader
-           v-model="form.value"
-           :options="form.options"
+           clearable
+           v-model="value"
+           :options="options"
            :props="{
             expandTrigger: 'hover', label: 'cat_name',
             value: 'cat_id',
@@ -79,7 +80,14 @@
            </el-cascader>
         </el-form-item>
       </el-tab-pane>
-      <el-tab-pane label="商品参数" name="2">商品参数</el-tab-pane>
+      <el-tab-pane label="商品参数" name="2">
+        <!-- 商品参数 显示动态信息 checkbox多选框组 checkbox-group元素能把多个 checkbox 管理为一组，只需要在 Group 中使用v-model绑定Array类型的变量即可。-->
+        <el-form-item v-for="item in form.attrs" :label="item.attr_name" :key="item.attr_id">
+          <el-checkbox-group v-model="item.attr_vals">
+            <el-checkbox border v-for="(item1,index) in item.attr_vals" :key="index" :label="item1"></el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+      </el-tab-pane>
       <el-tab-pane label="商品属性" name="3">商品属性</el-tab-pane>
       <el-tab-pane label="商品图片" name="4">商品图片</el-tab-pane>
       <el-tab-pane label="商品内容" name="5">商品内容</el-tab-pane>
@@ -101,22 +109,40 @@ export default {
         goods_weight: '',
         goods_introduce: '',
         pics: '',
-        attrs: '',
-        // 级联选择器使用的数据
-        value: [],
-        options: []
-        // 旧版本有的属性
-        // options: [],
-        // selectedOptions: [],
-        // defaultProp: {
-        //   label: 'cat_name',
-        //   value: 'cat_id',
-        //   children: 'children'
-        // }
-      }
+        attrs: []
+      },
+      // 级联选择器使用的数据
+      value: [],
+      // 三级分类选中时，value的形式是3个id组成的数组[70, 115, 131]
+      options: []
+      // 旧版本有的属性
+      // options: [],
+      // selectedOptions: [],
+      // defaultProp: {
+      //   label: 'cat_name',
+      //   value: 'cat_id',
+      //   children: 'children'
+      // }
     }
   },
   methods: {
+    // 点击纵向标签页,点的是第二个tab同时三级分类要有值
+    async handleClick () {
+      if (this.active === '2') {
+        if (this.value.length !== 3) {
+          this.$message.warning('请先选择三级分类')
+          return
+        }
+        // 参数列表:id分类 ID categories/:id/attributes sel[only,many]不能为空,通过 only或many来获取分类静态参数还是动态参数
+        const res = await this.$http.get(`categories/${this.value[2]}/attributes?sel=many`)
+        console.log('分类参数', res)
+        this.form.attrs = res.data.data
+        this.form.attrs.forEach((item) => {
+          item.attr_vals = item.attr_vals.trim().split(',')
+        })
+        console.log('this.form.attrs', this.form.attrs)
+      }
+    },
     // tabs标签页样式改变方法,可以直接给el-tabs v-model="active"绑定active 可省略以下方法
     // handleClick (tab, event) {
     //   console.log(tab, event)
@@ -125,7 +151,7 @@ export default {
     // 获取所有商品分类 categories type [1,2,3] 值：1，2，3 分别表示显示一层二层三层分类列表
     async getCategories () {
       const res = await this.$http.get(`categories?type=3`)
-      this.form.options = res.data.data
+      this.options = res.data.data
       // console.log('form.options', this.form.options)
       // 原生js嵌套遍历
       // var myoptions = []
