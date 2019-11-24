@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2019-11-23 16:41:12
- * @LastEditTime: 2019-11-24 15:24:35
+ * @LastEditTime: 2019-11-24 15:37:44
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \Vue.jsc:\编程\vuepro\mymall\src\components\goods\goodsadd.vue
@@ -83,6 +83,7 @@
       <el-tab-pane label="商品参数" name="2">
         <!-- 商品参数 显示动态信息 checkbox多选框组 checkbox-group元素能把多个 checkbox 管理为一组，只需要在 Group 中使用v-model绑定Array类型的变量即可。-->
         <el-form-item v-for="item in form.attrs" :label="item.attr_name" :key="item.attr_id">
+          <br>
           <el-checkbox-group v-model="item.attr_vals">
             <el-checkbox border v-for="(item1,index) in item.attr_vals" :key="index" :label="item1"></el-checkbox>
           </el-checkbox-group>
@@ -138,7 +139,7 @@ export default {
         console.log('分类参数', res)
         this.form.attrs = res.data.data
         this.form.attrs.forEach((item) => {
-          item.attr_vals = item.attr_vals.trim().split(',')
+          item.attr_vals = item.attr_vals ? item.attr_vals.trim().split(',') : []
         })
         console.log('this.form.attrs', this.form.attrs)
       }
