@@ -1,13 +1,13 @@
 <!--
  * @Author: your name
  * @Date: 2019-11-23 16:41:12
- * @LastEditTime: 2019-11-24 15:37:44
+ * @LastEditTime: 2019-11-24 16:34:27
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \Vue.jsc:\编程\vuepro\mymall\src\components\goods\goodsadd.vue
  -->
 <template>
-<el-card style="height:600px;">
+<el-card style="height:620px; overflow: scroll;">
   <!-- 面包屑 -->
   <my-bread level1="商品管理" level2="商品列表"></my-bread>
   <!-- alert警告 提示 -->
@@ -38,8 +38,8 @@
   pics上传的图片临时路径（对象）可以为空
   attrs商品的参数（数组）可以为空 -->
   <el-form ref="form" :model="form" label-width="80px">
-    <el-tabs tab-position="left" style="height: 400px;margin-top: 20px;"
-    v-model="active" @tab-click="handleClick">
+    <el-tabs tab-position="left" style="height:500px;margin-top: 20px;margin-bottom: 30px; overflow: scroll;"
+    v-model="active" @tab-click="handleClick" >
       <el-tab-pane label="基本信息" name="1">
         <el-form-item label="商品名称">
           <el-input v-model="form.goods_name"></el-input>
@@ -82,14 +82,19 @@
       </el-tab-pane>
       <el-tab-pane label="商品参数" name="2">
         <!-- 商品参数 显示动态信息 checkbox多选框组 checkbox-group元素能把多个 checkbox 管理为一组，只需要在 Group 中使用v-model绑定Array类型的变量即可。-->
-        <el-form-item v-for="item in form.attrs" :label="item.attr_name" :key="item.attr_id">
+        <el-form-item v-for="item in dynamicAttrs" :label="item.attr_name" :key="item.attr_id" label-width="auto">
           <br>
           <el-checkbox-group v-model="item.attr_vals">
             <el-checkbox border v-for="(item1,index) in item.attr_vals" :key="index" :label="item1"></el-checkbox>
           </el-checkbox-group>
         </el-form-item>
       </el-tab-pane>
-      <el-tab-pane label="商品属性" name="3">商品属性</el-tab-pane>
+      <!-- 商品属性 获取静态参数 -->
+      <el-tab-pane label="商品属性" name="3">
+        <el-form-item v-for="item in staticAttrs" :label="item.attr_name" :key="item.attr_id" label-width="auto">
+          <el-input v-model="item.attr_vals"></el-input>
+        </el-form-item>
+      </el-tab-pane>
       <el-tab-pane label="商品图片" name="4">商品图片</el-tab-pane>
       <el-tab-pane label="商品内容" name="5">商品内容</el-tab-pane>
     </el-tabs>
@@ -115,7 +120,7 @@ export default {
       // 级联选择器使用的数据
       value: [],
       // 三级分类选中时，value的形式是3个id组成的数组[70, 115, 131]
-      options: []
+      options: [],
       // 旧版本有的属性
       // options: [],
       // selectedOptions: [],
@@ -124,24 +129,32 @@ export default {
       //   value: 'cat_id',
       //   children: 'children'
       // }
+      // 动态参数、静态参数
+      dynamicAttrs: [],
+      staticAttrs: []
     }
   },
   methods: {
     // 点击纵向标签页,点的是第二个tab同时三级分类要有值
     async handleClick () {
-      if (this.active === '2') {
+      if (this.active !== '1') {
         if (this.value.length !== 3) {
           this.$message.warning('请先选择三级分类')
-          return
         }
+        if (this.active === '2') {
         // 参数列表:id分类 ID categories/:id/attributes sel[only,many]不能为空,通过 only或many来获取分类静态参数还是动态参数
-        const res = await this.$http.get(`categories/${this.value[2]}/attributes?sel=many`)
-        console.log('分类参数', res)
-        this.form.attrs = res.data.data
-        this.form.attrs.forEach((item) => {
-          item.attr_vals = item.attr_vals ? item.attr_vals.trim().split(',') : []
-        })
-        console.log('this.form.attrs', this.form.attrs)
+          const res = await this.$http.get(`categories/${this.value[2]}/attributes?sel=many`)
+          console.log('分类参数', res)
+          this.dynamicAttrs = res.data.data
+          this.dynamicAttrs.forEach((item) => {
+            item.attr_vals = item.attr_vals ? item.attr_vals.trim().split(',') : []
+          })
+          console.log('this.dynamicAttrs', this.dynamicAttrs)
+        } else if (this.active === '3') {
+          const res1 = await this.$http.get(`categories/${this.value[2]}/attributes?sel=only`)
+          this.staticAttrs = res1.data.data
+          console.log('this.staticAttrs', this.staticAttrs)
+        }
       }
     },
     // tabs标签页样式改变方法,可以直接给el-tabs v-model="active"绑定active 可省略以下方法
