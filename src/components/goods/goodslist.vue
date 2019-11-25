@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2019-11-23 15:12:59
- * @LastEditTime: 2019-11-23 16:50:18
+ * @LastEditTime: 2019-11-25 19:35:42
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \Vue.jsc:\编程\vuepro\mymall\src\components\goods\goodslist.vue
@@ -71,6 +71,7 @@ export default {
   created () {
     this.getGoodsList()
   },
+
   methods: {
     // 分页方法
     handleSizeChange (val) {
@@ -89,8 +90,6 @@ export default {
     },
     // 搜索商品
     searchGoods () {},
-    // 添加商品
-    addGoods () {},
     // 获取商品列表 goods
     async getGoodsList () {
     //   const res = await this.$http.get(`users?query=${this.query}&pagenum=${this.pagenum}&pagesize=${this.pagesize}`)

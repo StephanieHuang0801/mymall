@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2019-11-23 16:41:12
- * @LastEditTime: 2019-11-24 21:14:00
+ * @LastEditTime: 2019-11-25 20:51:49
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \Vue.jsc:\编程\vuepro\mymall\src\components\goods\goodsadd.vue
@@ -48,7 +48,7 @@
           <el-input v-model="form.goods_price"></el-input>
         </el-form-item>
         <el-form-item label="商品重量">
-          <el-input v-model="form. goods_weight"></el-input>
+          <el-input v-model="form.goods_weight"></el-input>
         </el-form-item>
         <el-form-item label="商品数量">
           <el-input v-model="form.goods_number"></el-input>
@@ -61,6 +61,7 @@
            :options="form.options"
            :props="{ expandTrigger: 'hover' }"
           > -->
+          <!-- value是选择分类三个id组成的数组 -->
            <el-cascader
            clearable
            v-model="value"
@@ -113,9 +114,9 @@
       </el-tab-pane>
       <el-tab-pane label="商品内容" name="5">
         <el-form-item label-width="auto">
-          <el-button type="primary" size="small" >添加商品</el-button>
+          <el-button type="primary" size="small" @click="addGoods">添加商品</el-button>
           <!-- 富文本编辑器 vue-quill-editor -->
-          <quill-editor></quill-editor>
+          <quill-editor v-model="form.goods_introduce"></quill-editor>
         </el-form-item>
       </el-tab-pane>
     </el-tabs>
@@ -138,12 +139,14 @@ export default {
       // 商品表单数据
       form: {
         goods_name: '',
-        goods_cat: '',
         goods_price: '',
         goods_number: '',
         goods_weight: '',
+        // 以 , 分割的字符串
+        goods_cat: '',
+        // 富文本编辑器绑定内容
         goods_introduce: '',
-        pics: '',
+        pics: [],
         attrs: []
       },
       // 级联选择器使用的数据
@@ -169,12 +172,47 @@ export default {
     }
   },
   methods: {
+    // 添加商品 post goods
+    async addGoods () {
+      this.form.goods_cat = this.value.join(',')
+      let arr1 = this.dynamicAttrs.map((item) => {
+        return {
+          attr_id: item.attr_id,
+          attr_value: item.attr_vals
+        }
+      })
+      let arr2 = this.staticAttrs.map((item) => {
+        return {
+          attr_id: item.attr_id,
+          attr_value: item.attr_vals
+        }
+      })
+      this.form.attrs = arr1.concat(arr2)
+      const res = await this.$http.post(`goods`, this.form)
+      if (res.data.meta.status === 201) {
+        this.$message.success(res.data.meta.msg)
+        this.form = {}
+      } else {
+        this.$message.warning(res.data.meta.msg)
+      }
+      console.log('添加商品', res)
+    },
     // 上传图片相关方法
     handlePreview (file) {},
     handleRemove (file) {
       console.log('删除图片的file', file)
+      // file.response.data.tmp_path
+      const index = this.form.pics.findIndex((item) => {
+        return item.pic === file.response.data.tmp_path
+      })
+      this.form.pics.splice(index, 1)
+      console.log('this.form.pics', this.form.pics)
     },
     handleSuccess (file) {
+      // file.data.tmp_path是路径
+      this.form.pics.push({
+        pic: file.data.tmp_path
+      })
       console.log('上传图片的file', file)
     },
     // 点击纵向标签页,点的是第二个tab同时三级分类要有值
@@ -183,20 +221,36 @@ export default {
         if (this.value.length !== 3) {
           this.$message.warning('请先选择三级分类')
         }
+        // const dynamicArr = []
+        // const staticArr = []
         if (this.active === '2') {
         // 参数列表:id分类 ID categories/:id/attributes sel[only,many]不能为空,通过 only或many来获取分类静态参数还是动态参数
           const res = await this.$http.get(`categories/${this.value[2]}/attributes?sel=many`)
           console.log('分类参数', res)
           this.dynamicAttrs = res.data.data
+
           this.dynamicAttrs.forEach((item) => {
             item.attr_vals = item.attr_vals ? item.attr_vals.trim().split(',') : []
+            // dynamicArr.push({
+            //   attr_id: item.attr_id,
+            //   attr_value: item.attr_vals
+            // })
           })
+          // console.log('this.value', this.value)
+          // [1, 3, 11]
           console.log('this.dynamicAttrs', this.dynamicAttrs)
         } else if (this.active === '3') {
           const res1 = await this.$http.get(`categories/${this.value[2]}/attributes?sel=only`)
           this.staticAttrs = res1.data.data
+          // this.staticAttrs.forEach((item) => {
+          //   staticArr.push({
+          //     attr_id: item.attr_id,
+          //     attr_value: item.attr_vals
+          //   })
+          // })
           console.log('this.staticAttrs', this.staticAttrs)
         }
+        console.log('this.form.attrs', this.form.attrs)
       }
     },
     // tabs标签页样式改变方法,可以直接给el-tabs v-model="active"绑定active 可省略以下方法
