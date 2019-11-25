@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2019-11-23 16:41:12
- * @LastEditTime: 2019-11-25 20:51:49
+ * @LastEditTime: 2019-11-25 21:03:20
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \Vue.jsc:\编程\vuepro\mymall\src\components\goods\goodsadd.vue
@@ -192,28 +192,31 @@ export default {
       if (res.data.meta.status === 201) {
         this.$message.success(res.data.meta.msg)
         this.form = {}
+        this.$router.push({
+          name: 'goodslists'
+        })
       } else {
         this.$message.warning(res.data.meta.msg)
       }
-      console.log('添加商品', res)
+      // console.log('添加商品', res)
     },
     // 上传图片相关方法
     handlePreview (file) {},
     handleRemove (file) {
-      console.log('删除图片的file', file)
+      // console.log('删除图片的file', file)
       // file.response.data.tmp_path
       const index = this.form.pics.findIndex((item) => {
         return item.pic === file.response.data.tmp_path
       })
       this.form.pics.splice(index, 1)
-      console.log('this.form.pics', this.form.pics)
+      // console.log('this.form.pics', this.form.pics)
     },
     handleSuccess (file) {
       // file.data.tmp_path是路径
       this.form.pics.push({
         pic: file.data.tmp_path
       })
-      console.log('上传图片的file', file)
+      // console.log('上传图片的file', file)
     },
     // 点击纵向标签页,点的是第二个tab同时三级分类要有值
     async handleClick () {
@@ -226,7 +229,7 @@ export default {
         if (this.active === '2') {
         // 参数列表:id分类 ID categories/:id/attributes sel[only,many]不能为空,通过 only或many来获取分类静态参数还是动态参数
           const res = await this.$http.get(`categories/${this.value[2]}/attributes?sel=many`)
-          console.log('分类参数', res)
+          // console.log('分类参数', res)
           this.dynamicAttrs = res.data.data
 
           this.dynamicAttrs.forEach((item) => {
@@ -238,7 +241,7 @@ export default {
           })
           // console.log('this.value', this.value)
           // [1, 3, 11]
-          console.log('this.dynamicAttrs', this.dynamicAttrs)
+          // console.log('this.dynamicAttrs', this.dynamicAttrs)
         } else if (this.active === '3') {
           const res1 = await this.$http.get(`categories/${this.value[2]}/attributes?sel=only`)
           this.staticAttrs = res1.data.data
@@ -248,9 +251,9 @@ export default {
           //     attr_value: item.attr_vals
           //   })
           // })
-          console.log('this.staticAttrs', this.staticAttrs)
+          // console.log('this.staticAttrs', this.staticAttrs)
         }
-        console.log('this.form.attrs', this.form.attrs)
+        // console.log('this.form.attrs', this.form.attrs)
       }
     },
     // tabs标签页样式改变方法,可以直接给el-tabs v-model="active"绑定active 可省略以下方法
