@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2019-11-25 21:05:33
- * @LastEditTime: 2019-11-27 21:50:12
+ * @LastEditTime: 2019-11-27 22:21:48
  * @LastEditors: Please set LastEditors
  * @Description: 商品分类参数
  * @FilePath: \Vue.jsc:\编程\vuepro\mymall\src\components\goods\cateparams.vue
@@ -78,7 +78,7 @@
                    >
                     <template slot-scope="scope">
                       <!-- 编辑参数按钮 -->
-                      <el-button type="primary" icon="el-icon-edit" size="small" circle @click="dialogFormVisibleEditAttr = true"></el-button>
+                      <el-button type="primary" icon="el-icon-edit" size="small" circle @click="showEditAttr(scope.row)"></el-button>
                       <!-- 删除参数按钮 -->
                       <el-button type="danger" icon="el-icon-delete" size="small" circle @click="delAttr(scope.row)"></el-button>
                     </template>
@@ -89,6 +89,18 @@
         </el-tabs>
       </el-form-item>
     </el-form>
+        <!-- 修改动态参数弹框 -->
+    <el-dialog title="修改动态参数" :visible.sync="dialogFormVisibleEditAttr">
+        <el-form :model="editAttrs">
+            <el-form-item label="动态参数" >
+                <el-input v-model="editAttrs.attrname" autocomplete="off"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormVisibleEditAttr = false">取 消</el-button>
+            <el-button type="primary" @click="changeAttr">确 定</el-button>
+        </div>
+    </el-dialog>
   </el-card>
 </template>
 <script>
@@ -103,10 +115,37 @@ export default {
       dialogFormVisibleEditAttr: false,
       inputVisible: false,
       inputValue: '',
-      dynamicAttrs: []
+      dynamicAttrs: [],
+      // 要编辑的参数
+      editAttrs: {
+        attrname: '',
+        attrsel: '',
+        attrid: ''
+      },
+      currentCatId: -1
     }
   },
   methods: {
+    // 点击确认，修改参数应该是编辑提交参数
+    async changeAttr () {
+      let obj = {
+        attr_name: this.editAttrs.attrname,
+        attr_sel: this.editAttrs.attrsel
+      }
+      const res = await this.$http.put(`categories/${this.currentCatId}/attributes/${this.editAttrs.attrid}`, obj)
+      this.dialogFormVisibleEditAttr = false
+      this.handleChange()
+      console.log('修改动态参数', res)
+    },
+    // 展示编辑参数的对话框
+    showEditAttr (attr) {
+      this.dialogFormVisibleEditAttr = true
+      this.editAttrs.attrname = attr.attr_name
+      this.editAttrs.attrsel = attr.attr_sel
+      this.editAttrs.attrid = attr.attr_id
+      // console.log('this.editAttrs.attrname', this.editAttrs.attrname)
+      this.currentCatId = attr.cat_id
+    },
     // 删除整行参数
     async delAttr (attr) {
     // 这里把整个分类都删了
