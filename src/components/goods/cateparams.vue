@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2019-11-25 21:05:33
- * @LastEditTime: 2019-11-27 21:28:36
+ * @LastEditTime: 2019-11-27 21:43:10
  * @LastEditors: Please set LastEditors
  * @Description: 商品分类参数
  * @FilePath: \Vue.jsc:\编程\vuepro\mymall\src\components\goods\cateparams.vue
@@ -54,8 +54,8 @@
                       v-model="inputValue"
                       ref="saveTagInput"
                       size="small"
-                      @keyup.enter.native="handleInputConfirm(scope.row.attr_vals)"
-                      @blur="handleInputConfirm(scope.row.attr_vals)"
+                      @keyup.enter.native="handleInputConfirm(scope.row)"
+                      @blur="handleInputConfirm(scope.row)"
                       >
                       </el-input>
                       <el-button v-else class="button-new-tag" size="small" @click="showInput">+ New Tag</el-button>
@@ -123,7 +123,7 @@ export default {
       //   attr_sel[only,many]
       //   attr_vals
       // splice方法返回值是被删掉的那个
-      var obj = {
+      let obj = {
         attr_name: attr.attr_name,
         attr_sel: attr.attr_sel,
         attr_vals: attr.attr_vals.join(',')
@@ -134,7 +134,7 @@ export default {
       } else {
         this.$message.warning(res.data.meta.msg)
       }
-      console.log('删除参数', res)
+      // console.log('删除参数', res)
     // 这里把整个分类都删了
     //   const res = await this.$http.delete(`categories/${attr.cat_id}/attributes/${attr.attr_id}`)
     //   if (res.data.meta.status === 200) {
@@ -150,13 +150,26 @@ export default {
         this.$refs.saveTagInput.$refs.input.focus()
       })
     },
-    handleInputConfirm (attrvals) {
+    // 添加动态参数attrvals post categories/:id/attributes
+    async handleInputConfirm (attr) {
       let inputValue = this.inputValue
       if (inputValue) {
-        attrvals.push(inputValue)
+        attr.attr_vals.push(inputValue)
       }
       this.inputVisible = false
       this.inputValue = ''
+      let obj = {
+        attr_name: attr.attr_name,
+        attr_sel: attr.attr_sel,
+        attr_vals: attr.attr_vals.join(',')
+      }
+      const res = await this.$http.post(`categories/${attr.cat_id}/attributes`, obj)
+      console.log('添加参数', res)
+      if (res.data.meta.status === 200) {
+        this.$message.success(res.data.meta.msg)
+      } else {
+        this.$message.warning(res.data.meta.msg)
+      }
     },
     // 点击级联选择器，且选中一值时才发请求
     async handleChange () {
