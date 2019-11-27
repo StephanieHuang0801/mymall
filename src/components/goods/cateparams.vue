@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2019-11-25 21:05:33
- * @LastEditTime: 2019-11-26 21:31:37
+ * @LastEditTime: 2019-11-27 21:28:36
  * @LastEditors: Please set LastEditors
  * @Description: 商品分类参数
  * @FilePath: \Vue.jsc:\编程\vuepro\mymall\src\components\goods\cateparams.vue
@@ -31,19 +31,21 @@
         ></el-cascader>
         <el-tabs v-model="active" @tab-click="tabsHandleClick">
            <el-tab-pane label="动态参数" name="1">
+              <el-button type="danger">添加动态参数</el-button>
+              <!-- :data="tableData"不用给表格绑定tableData这么麻烦，直接就是dynamicAttrs了 -->
               <el-table
-               :data="tableData"
+               :data="dynamicAttrs"
                border
                style="width: 100%">
                  <!-- 展开展示参数tag -->
-                 <el-table-column type="expand" prop="tableData" >
-                     <template>
+                 <el-table-column type="expand" prop="dynamicAttrs" >
+                     <template slot-scope="scope">
                       <el-tag
                        :key="tag"
-                       v-for="tag in dynamicTags"
+                       v-for="tag in scope.row.attr_vals"
                        closable
                        :disable-transitions="false"
-                       @close="handleClose(tag)">
+                       @close="handleClose(scope.row,tag)">
                        {{tag}}
                       </el-tag>
                       <el-input
@@ -52,8 +54,8 @@
                       v-model="inputValue"
                       ref="saveTagInput"
                       size="small"
-                      @keyup.enter.native="handleInputConfirm"
-                      @blur="handleInputConfirm"
+                      @keyup.enter.native="handleInputConfirm(scope.row.attr_vals)"
+                      @blur="handleInputConfirm(scope.row.attr_vals)"
                       >
                       </el-input>
                       <el-button v-else class="button-new-tag" size="small" @click="showInput">+ New Tag</el-button>
@@ -96,11 +98,12 @@ export default {
       value: [],
       options: [],
       active: '1',
-      tableData: [],
+      // tableData: [],
       dynamicTags: [],
       dialogFormVisibleEditAttr: false,
       inputVisible: false,
-      inputValue: ''
+      inputValue: '',
+      dynamicAttrs: []
     }
   },
   methods: {
@@ -113,8 +116,33 @@ export default {
       console.log('b', b)
     //   const res = await this.$http.get(`categories/:id/attributes/:attrId`)
     },
-    handleClose (tag) {
-      this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1)
+    // 点击tag删除参数 put categories/:id/attributes/:attrId
+    async handleClose (attr, tag) {
+      attr.attr_vals.splice(attr.attr_vals.indexOf(tag), 1)
+      //   attr_name
+      //   attr_sel[only,many]
+      //   attr_vals
+      // splice方法返回值是被删掉的那个
+      var obj = {
+        attr_name: attr.attr_name,
+        attr_sel: attr.attr_sel,
+        attr_vals: attr.attr_vals.join(',')
+      }
+      const res = await this.$http.put(`categories/${attr.cat_id}/attributes/${attr.attr_id}`, obj)
+      if (res.data.meta.status === 200) {
+        this.$message.success(res.data.meta.msg)
+      } else {
+        this.$message.warning(res.data.meta.msg)
+      }
+      console.log('删除参数', res)
+    // 这里把整个分类都删了
+    //   const res = await this.$http.delete(`categories/${attr.cat_id}/attributes/${attr.attr_id}`)
+    //   if (res.data.meta.status === 200) {
+    //     this.$message.success(res.data.meta.msg)
+    //   } else {
+    //     this.$message.warning(res.data.meta.msg)
+    //   }
+      // console.log('删除参数', res)
     },
     showInput () {
       this.inputVisible = true
@@ -122,10 +150,10 @@ export default {
         this.$refs.saveTagInput.$refs.input.focus()
       })
     },
-    handleInputConfirm () {
+    handleInputConfirm (attrvals) {
       let inputValue = this.inputValue
       if (inputValue) {
-        this.dynamicTags.push(inputValue)
+        attrvals.push(inputValue)
       }
       this.inputVisible = false
       this.inputValue = ''
@@ -137,17 +165,19 @@ export default {
           const res = await this.$http.get(`categories/${this.value[2]}/attributes?sel=many`)
           this.dynamicAttrs = res.data.data
           console.log('dynamicAttrs', this.dynamicAttrs)
-          var tmpArr = []
+          // 不用这么麻烦
+          //   var tmpArr = []
           this.dynamicAttrs.forEach((item) => {
-            tmpArr.push({
-              attr_name: item.attr_name,
-              id: item.attr_id
-            })
-            // dynamicTags: item.attr_vals.split(',')需要发请求
-            // ["一级", "二级", "三级"]
-            // console.log('dynamicTags', this.dynamicTags)
+          // 把attr_vals转为数组类型
+            item.attr_vals = item.attr_vals.split(',')
+          // tmpArr.push({
+          //   attr_name: item.attr_name,
+          //   id: item.attr_id
           })
-          this.tableData = tmpArr
+          // ["一级", "二级", "三级"]
+          // console.log('dynamicTags', this.dynamicTags)
+          // })
+          // this.tableData = tmpArr
         } else if (this.active === '2') {
           const res1 = await this.$http.get(`categories/${this.value[2]}/attributes?sel=only`)
           this.staticAttrs = res1.data.data
@@ -166,7 +196,7 @@ export default {
 }
 </script>
 <style>
-.is-always-shadow,.el-alert,.el-cascader  {
+.is-always-shadow,.el-alert,.el-cascader,.el-button--danger {
     margin-bottom: 15px;
 }
 .el-tag + .el-tag {
