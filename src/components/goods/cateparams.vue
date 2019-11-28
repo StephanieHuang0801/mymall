@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2019-11-25 21:05:33
- * @LastEditTime: 2019-11-27 22:21:48
+ * @LastEditTime: 2019-11-28 20:12:59
  * @LastEditors: Please set LastEditors
  * @Description: 商品分类参数
  * @FilePath: \Vue.jsc:\编程\vuepro\mymall\src\components\goods\cateparams.vue
@@ -31,7 +31,7 @@
         ></el-cascader>
         <el-tabs v-model="active" @tab-click="tabsHandleClick">
            <el-tab-pane label="动态参数" name="1">
-              <el-button type="danger">添加动态参数</el-button>
+              <el-button type="danger" @click="dialogFormVisibleAddDynamicAttr = true">添加动态参数</el-button>
               <!-- :data="tableData"不用给表格绑定tableData这么麻烦，直接就是dynamicAttrs了 -->
               <el-table
                :data="dynamicAttrs"
@@ -85,7 +85,10 @@
                  </el-table-column>
               </el-table>
            </el-tab-pane>
-           <el-tab-pane label="静态参数" name="2">配置管理</el-tab-pane>
+           <!-- 静态参数页面 -->
+           <el-tab-pane label="静态参数" name="2">
+              <el-button type="danger">添加静态参数</el-button>
+           </el-tab-pane>
         </el-tabs>
       </el-form-item>
     </el-form>
@@ -101,6 +104,18 @@
             <el-button type="primary" @click="changeAttr">确 定</el-button>
         </div>
     </el-dialog>
+    <!-- 添加动态参数弹框 -->
+    <el-dialog title="添加动态参数" :visible.sync="dialogFormVisibleAddDynamicAttr">
+        <el-form>
+            <el-form-item label="动态参数" >
+                <el-input v-model="dynamicAttr" autocomplete="off"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormVisibleAddDynamicAttr = false">取 消</el-button>
+            <el-button type="primary" @click="addDynamicAttr">确 定</el-button>
+        </div>
+    </el-dialog>
   </el-card>
 </template>
 <script>
@@ -113,6 +128,9 @@ export default {
       // tableData: [],
       dynamicTags: [],
       dialogFormVisibleEditAttr: false,
+      dialogFormVisibleAddDynamicAttr: false,
+      // 要添加的动态参数
+      dynamicAttr: '',
       inputVisible: false,
       inputValue: '',
       dynamicAttrs: [],
@@ -126,6 +144,17 @@ export default {
     }
   },
   methods: {
+    // 点击确认按钮，添加动态参数 categories/:id/attributes
+    async addDynamicAttr () {
+      let obj = {
+        attr_name: this.dynamicAttr,
+        attr_sel: 'many'
+      }
+      const res = await this.$http.post(`categories/${this.dynamicAttrs[0].cat_id}/attributes`, obj)
+      this.dialogFormVisibleAddDynamicAttr = false
+      this.handleChange()
+      console.log('添加动态参数', res)
+    },
     // 点击确认，修改参数应该是编辑提交参数
     async changeAttr () {
       let obj = {
