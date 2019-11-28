@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2019-11-06 22:41:40
- * @LastEditTime: 2019-11-25 21:09:27
+ * @LastEditTime: 2019-11-28 20:40:17
  * @LastEditors: Please set LastEditors
  * @Description: In User Settings Edit
  * @FilePath: \Vue.jsc:\编程\vuepro\mymall\src\router\index.js
@@ -16,6 +16,7 @@ import Role from '@/components/rights/role.vue'
 import GoodsList from '@/components/goods/goodslist.vue'
 import GoodsAdd from '@/components/goods/goodsadd.vue'
 import Cateparams from '@/components/goods/cateparams.vue'
+import Goodscate from '@/components/goods/goodscate.vue'
 import { Message } from 'element-ui'
 Vue.use(Router)
 
@@ -48,9 +49,13 @@ const router = new Router({
           path: 'goodsadd',
           component: GoodsAdd
         },
-        { name: 'categories',
+        { name: 'params',
           path: 'params',
           component: Cateparams
+        },
+        { name: 'categories',
+          path: 'categories',
+          component: Goodscate
         }
       ]
     }
