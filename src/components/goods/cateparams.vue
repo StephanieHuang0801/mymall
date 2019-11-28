@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2019-11-25 21:05:33
- * @LastEditTime: 2019-11-28 20:12:59
+ * @LastEditTime: 2019-11-28 20:32:15
  * @LastEditors: Please set LastEditors
  * @Description: 商品分类参数
  * @FilePath: \Vue.jsc:\编程\vuepro\mymall\src\components\goods\cateparams.vue
@@ -87,7 +87,34 @@
            </el-tab-pane>
            <!-- 静态参数页面 -->
            <el-tab-pane label="静态参数" name="2">
-              <el-button type="danger">添加静态参数</el-button>
+              <el-button type="danger" @click="dialogFormVisibleAddStaticAttr=true">添加静态参数</el-button>
+                <el-table
+               :data="staticAttrs"
+               border
+               style="width: 100%">
+                 <el-table-column
+                   type="index"
+                   prop="id"
+                   label="序号"
+                   width="50">
+                 </el-table-column>
+                 <el-table-column
+                   prop="attr_name"
+                   label="参数名称"
+                   width="600">
+                 </el-table-column>
+                 <el-table-column
+                   prop="date"
+                   label="操作"
+                   >
+                    <template slot-scope="scope">
+                      <!-- 编辑参数按钮 -->
+                      <el-button type="primary" icon="el-icon-edit" size="small" circle @click="showEditAttr(scope.row)"></el-button>
+                      <!-- 删除参数按钮 -->
+                      <el-button type="danger" icon="el-icon-delete" size="small" circle @click="delAttr(scope.row)"></el-button>
+                    </template>
+                 </el-table-column>
+              </el-table>
            </el-tab-pane>
         </el-tabs>
       </el-form-item>
@@ -116,6 +143,18 @@
             <el-button type="primary" @click="addDynamicAttr">确 定</el-button>
         </div>
     </el-dialog>
+    <!-- 添加静态参数弹框 -->
+    <el-dialog title="添加静态参数" :visible.sync="dialogFormVisibleAddStaticAttr">
+        <el-form>
+            <el-form-item label="静态参数" >
+                <el-input v-model="staticAttr" autocomplete="off"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormVisibleAddStaticAttr = false">取 消</el-button>
+            <el-button type="primary" @click="addStaticAttr">确 定</el-button>
+        </div>
+    </el-dialog>
   </el-card>
 </template>
 <script>
@@ -129,11 +168,17 @@ export default {
       dynamicTags: [],
       dialogFormVisibleEditAttr: false,
       dialogFormVisibleAddDynamicAttr: false,
+      dialogFormVisibleAddStaticAttr: false,
       // 要添加的动态参数
       dynamicAttr: '',
+      // 要添加的静态参数
+      staticAttr: '',
       inputVisible: false,
       inputValue: '',
+      // 动态参数初始数组
       dynamicAttrs: [],
+      // 静态参数初始数组
+      staticAttrs: [],
       // 要编辑的参数
       editAttrs: {
         attrname: '',
@@ -144,16 +189,28 @@ export default {
     }
   },
   methods: {
+    // 该方法先写好，尚未测试
+    // 点击确认按钮，添加静态参数 categories/:id/attributes
+    async addStaticAttr () {
+      let obj = {
+        attr_name: this.staticAttr,
+        attr_sel: 'only'
+      }
+      const res = await this.$http.post(`categories/${this.staticAttrs[0].cat_id}/attributes`, obj)
+      this.dialogFormVisibleAddStaticAttr = false
+      this.handleChange()
+      console.log('添加静态参数', res)
+    },
     // 点击确认按钮，添加动态参数 categories/:id/attributes
     async addDynamicAttr () {
       let obj = {
         attr_name: this.dynamicAttr,
         attr_sel: 'many'
       }
-      const res = await this.$http.post(`categories/${this.dynamicAttrs[0].cat_id}/attributes`, obj)
+      await this.$http.post(`categories/${this.dynamicAttrs[0].cat_id}/attributes`, obj)
       this.dialogFormVisibleAddDynamicAttr = false
       this.handleChange()
-      console.log('添加动态参数', res)
+    //   console.log('添加动态参数', res)
     },
     // 点击确认，修改参数应该是编辑提交参数
     async changeAttr () {
@@ -187,7 +244,10 @@ export default {
       console.log('删除参数', res)
       this.handleChange()
     },
-    tabsHandleClick () {},
+    // 当静态/动态tab变化时
+    tabsHandleClick () {
+      this.handleChange()
+    },
     // 根据id查参数categories/:id/attributes/:attrId
     async getAttrs (a, b) {
       console.log('a', a)
@@ -242,7 +302,9 @@ export default {
       }
     },
     // 点击级联选择器，且选中一值时才发请求
+    // 对静态参数/动态参数赋初值
     async handleChange () {
+      console.log('this.active', this.active)
       if (this.value.length === 3) {
         if (this.active === '1') {
           const res = await this.$http.get(`categories/${this.value[2]}/attributes?sel=many`)
